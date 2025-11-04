@@ -59,7 +59,7 @@ class StillPresent(models.Model):
 
     class Meta:
        
-        unique_together = ('user', 'issue')  # Prevent duplicate “still present” from same user
+        unique_together = ('owner', 'issue')  # Prevent duplicate “still present” from same user
 
     def __str__(self):
        
