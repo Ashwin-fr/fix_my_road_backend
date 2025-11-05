@@ -1,0 +1,247 @@
+ROAD ISSUE TRACKER - API DOCUMENTATION
+======================================
+
+Base URL: http://127.0.0.1:8000/api/
+
+
+1. AUTHENTICATION MODULE
+------------------------
+
+1.1 Register User
+-----------------
+POST /auth/register/
+
+Description:
+Create a new user account.
+
+Request Body:
+{
+  "username": "sajay",
+  "password": "mypassword123",
+  "email": "sajay@example.com"
+}
+
+Response:
+{
+  "message": "User registered successfully",
+  "user": {
+    "id": 1,
+    "username": "sajay",
+    "email": "sajay@example.com"
+  }
+}
+
+
+1.2 Login User
+--------------
+POST /auth/login/
+
+Description:
+Login with credentials and receive a JWT token.
+
+Request Body:
+{
+  "username": "sajay",
+  "password": "mypassword123"
+}
+
+Response:
+{
+  "token": "eyJ0eXAiOiJKV1QiLCJh...",
+  
+}
+
+Note:
+
+2. ISSUE MODULE
+----------------
+
+2.1 List All Issues
+-------------------
+GET /issues/
+
+Description:
+Fetch all reported issues (latest first).
+
+Headers:
+Authorization: Bearer <token>
+
+Response:
+[
+  {
+    "id": 1,
+    "title": "Pothole near bus stop",
+    "description": "Huge pothole blocking one lane",
+    "category": "pothole",
+    "image": "http://127.0.0.1:8000/media/issues/pothole.jpg",
+    "location": "Main Road, Kochi",
+    "status": "pending",
+    "still_present_count": 3,
+    "user": "sajay",
+    "created_at": "2025-10-28T08:45:00Z"
+  }
+]
+
+
+2.2 Create a New Issue
+----------------------
+POST /issues/
+
+Description:
+User can upload a new road issue.
+
+Headers:
+Authorization: Token <token>
+Content-Type: multipart/form-data
+
+Request Body (Form Data):
+title       - string (required)
+description - string (required)
+category    - string (required)
+image       - file   (optional)
+location    - string (optional)
+
+Response:
+{
+  "id": 5,
+  "title": "Streetlight not working",
+  "status": "pending",
+  "message": "Issue created successfully"
+}
+
+
+2.3 View Issue Detail
+---------------------
+GET /issues/<id>/
+
+Response:
+{
+  "id": 1,
+  "title": "Pothole near bus stop",
+  "description": "Huge pothole blocking one lane",
+  "category": "pothole",
+  "image": "http://127.0.0.1:8000/media/issues/pothole.jpg",
+  "location": "Main Road, Kochi",
+  "status": "pending",
+  "still_present_count": 3,
+  "user": "sajay",
+  "created_at": "2025-10-28T08:45:00Z"
+}
+
+
+2.4 Delete Issue
+----------------
+DELETE /issues/<id>/
+
+Description:
+Delete an issue (only by the owner).
+
+Headers:
+Authorization: Token <token>
+
+Response:
+{
+  "message": "Issue deleted successfully"
+}
+
+
+3. STILL PRESENT MODULE
+------------------------
+
+3.1 Mark Issue as Still Present
+-------------------------------
+POST /issues/<id>/still-present/
+
+Description:
+Mark issue as still present. Each user can mark once.
+
+Headers:
+Authorization: Token <token>
+
+Response (first time):
+{
+  "message": "Marked as still present"
+}
+
+Response (already marked):
+{
+  "error": "You already marked this issue as still present"
+}
+
+
+3.2 View Still Present Count
+----------------------------
+Included automatically in issue responses as "still_present_count"
+
+
+4. ADMIN MODULE
+----------------
+
+4.1 Update Issue Status
+-----------------------
+PATCH /issues/<id>/status/
+
+Description:
+Allow admin to update issue status to resolved.
+
+Headers:
+Authorization: Token <admin_token>
+Content-Type: application/json
+
+Request Body:
+{
+  "status": "resolved"
+}
+
+Response:
+{
+  "message": "Issue status updated successfully",
+  "issue": {
+    "id": 1,
+    "title": "Pothole near bus stop",
+    "status": "resolved"
+  }
+}
+
+
+5. FRONTEND FLOW (React)
+-------------------------
+
+Page           | API Endpoint                      | Description
+---------------|-----------------------------------|-----------------------------
+Login          | /auth/login/                      | User login
+Register       | /auth/register/                   | Create account
+Dashboard      | /issues/                          | List all issues
+Add Issue      | /issues/ (POST)                   | Submit new issue form
+Issue Detail   | /issues/<id>/                     | View issue details
+Still Present  | /issues/<id>/still-present/       | Mark as still present
+Admin Panel    | /issues/<id>/status/              | Update to resolved
+
+
+6. SAMPLE AXIOS CONFIG (React)
+-------------------------------
+import axios from "axios";
+
+const API = axios.create({
+  baseURL: "http://127.0.0.1:8000/api/",
+});
+
+API.interceptors.request.use((config) => {
+  const token = localStorage.getItem("access");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+export default API;
+
+
+LEARNING OBJECTIVES
+-------------------
+- JWT Authentication (React + DRF)
+- File uploads in Django REST Framework
+- Handling protected routes in React
+- Performing CRUD operations via API
+- Admin-based permission system
+- Relationship handling (StillPresent model)

@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
+from api.models import Issue
 
 class UserSerializer(serializers.ModelSerializer):
 
@@ -37,3 +38,14 @@ class UserSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Password field doesn't match")
         
         return data
+    
+
+class IssueSerializer(serializers.ModelSerializer):
+
+    class Meta:
+
+        model = Issue
+
+        fields = '__all__'
+
+        read_only_fields = ('id','owner','created_at','updated_at')
