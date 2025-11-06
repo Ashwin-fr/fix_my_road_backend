@@ -7,4 +7,5 @@ urlpatterns = [
     path('auth/login/',ObtainAuthToken.as_view()),
     path('issues/',views.IssueListCreateView.as_view()),
     path('issues/<int:pk>/',views.IssueUpdateDestroyView.as_view()),
+    path('issues/<int:pk>/still-present/',views.StillPresentView.as_view()),
 ]

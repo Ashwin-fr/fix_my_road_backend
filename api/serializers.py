@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from api.models import Issue
+from api.models import Issue,StillPresent
 
 class UserSerializer(serializers.ModelSerializer):
 
@@ -42,6 +42,10 @@ class UserSerializer(serializers.ModelSerializer):
 
 class IssueSerializer(serializers.ModelSerializer):
 
+    still_present_count = serializers.CharField(read_only=True)
+
+    reacted = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
 
         model = Issue
@@ -49,3 +53,23 @@ class IssueSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
         read_only_fields = ('id','owner','created_at','updated_at')
+
+    def get_reacted(self,object):
+
+        # We have to fetch all users those who reacted current issue object.
+        # Here issue object is object
+        
+        users_list = StillPresent.objects.filter(issue = object).values_list('owner',flat=True)
+
+        print(users_list)
+
+        print(self.context.get('user'))
+
+        if self.context.get('user') in users_list:
+
+            return True
+        
+        else:
+
+            return False
+
